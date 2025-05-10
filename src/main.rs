@@ -1,11 +1,11 @@
 use std::time::{Instant, Duration};
 
 
-fn pixelLoop(FPS: usize, update: fn(), render: fn()) {
+fn pixelLoop<S>(mut state: S, FPS: usize, update: fn(&mut S), render: fn(&mut S, Duration)) {
 
     if(FPS == 0 ) {
         panic!("Can't have 0 FPS") 
-    } 
+    }
 
 
     let mut accum: Duration = Duration::new(0,0);
@@ -26,24 +26,43 @@ fn pixelLoop(FPS: usize, update: fn(), render: fn()) {
         }
 
         while(accum > update_dt) {
-            update();
+            update(&mut state);
             accum -= update_dt;
         }
 
-        render();
+        render(&mut state, dt );
         accum += dt;
     }
 }
 
 
+#[derive(Default)]
+struct State {
+      updatesCalled: usize,
+      rendersCalled: usize,
+      timePassed: Duration,
+}
 
 fn main() {
-    pixelLoop(120, || {
-        println!("update");
-    }, || {
+    let state = State::default();
+
+
+    pixelLoop(state,120, |s| {
+        s.updatesCalled += 1;
+        //println!("update");
+    }, |s, dt| {
+        s.rendersCalled += 1;
+        s.timePassed += dt;
         
+        if(s.timePassed > Duration::from_secs(2)){
+            println!("Update FPS: {:.2}", s.updatesCalled as f64 / 2f64);
+            println!("Render FPS: {:.2}", s.rendersCalled as f64 / 2f64);
+            s.updatesCalled = 0;
+            s.rendersCalled = 0;
+            s.timePassed = Duration::default();
+
+        }
         std::thread::sleep(Duration::from_millis(16));
-        println!("render");
-    }
-);
+        //println!("render");
+    });
 }
