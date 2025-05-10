@@ -63,7 +63,7 @@ impl Default for State {
             boxSize: (50, 50),
         }
     }
-} 
+}
 
 
 fn main() {
@@ -77,7 +77,7 @@ fn main() {
         (WIDTH as u32,HEIGHT as u32),
         120,
         |s, WIDTH, HEIGHT| {
-            
+
             //Update the box position
             s.boxPosition.0 = s.boxPosition.0 + s.boxDirection.0;
             s.boxPosition.1 = s.boxPosition.1 + s.boxDirection.1;
@@ -89,7 +89,7 @@ fn main() {
                 s.boxDirection.1 = s.boxDirection.1 * -1;
                 s.boxPosition.1 = s.boxPosition.1 + s.boxDirection.1
             }
-            
+
             s.updatesCalled += 1;
         //println!("update");
     }, |s, dt, WIDTH, HEIGHT, pixels| {
@@ -105,7 +105,7 @@ fn main() {
                     buffer[index + 3] = 255;
                 }
             }
-            
+
             //Render the box
             for y in s.boxPosition.1 as usize..s.boxPosition.1 as usize + s.boxSize.1 {
                 for x in s.boxPosition.0 as usize..s.boxPosition.0 as usize + s.boxSize.0 {
@@ -117,15 +117,16 @@ fn main() {
                 }
             }
 
+        //slow rendering down to 60ish fps
+        std::thread::sleep(Duration::from_millis(9));
 
-
-        //This stuff just checks update and render fps    
+        //This stuff just checks update and render fps
         s.rendersCalled += 1;
         s.timePassed += dt;
         
-        if(s.timePassed > Duration::from_secs(2)){
-            println!("Update FPS: {:.2}", s.updatesCalled as f64 / 2f64);
-            println!("Render FPS: {:.2}", s.rendersCalled as f64 / 2f64);
+        if(s.timePassed > Duration::from_secs(1)){
+            println!("Update FPS: {:.2}", s.updatesCalled as f64 / 1f64);
+            println!("Render FPS: {:.2}", s.rendersCalled as f64 / 1f64);
             s.updatesCalled = 0;
             s.rendersCalled = 0;
             s.timePassed = Duration::default();
@@ -160,7 +161,7 @@ fn pixelLoopTao<S: 'static>(mut state: S, (width, height):(u32,u32), FPS: usize,
         Pixels::new(width, height, surface_texture).unwrap()
     };
 
-    //timer stuff setup 
+    //timer stuff setup
     let mut accum: Duration = Duration::new(0,0);
     let mut currentTime = Instant::now();
     let mut lastTime = Instant::now();
@@ -182,7 +183,7 @@ fn pixelLoopTao<S: 'static>(mut state: S, (width, height):(u32,u32), FPS: usize,
                 if dt > Duration::from_millis(100) {
                     dt = Duration::from_millis(100);
                 }
-                
+
                 //update at fixed rate
                 while accum > update_dt {
                     update(&mut state, width, height);
